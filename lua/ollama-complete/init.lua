@@ -23,6 +23,18 @@ local function complete(opts)
 		},
 	}
 
+	if config.options.debug then
+		vim.notify("[ollama-complete] Request URL: " .. url, vim.log.levels.INFO)
+		vim.notify("[ollama-complete] Payload: " .. vim.inspect(payload), vim.log.levels.INFO)
+		local log_path = "/tmp/ollama-complete-debug.log"
+		local f = io.open(log_path, "a")
+		if f then
+			f:write(os.date("[%Y-%m-%d %H:%M:%S] ") .. "Request URL: " .. url .. "\n")
+			f:write(os.date("[%Y-%m-%d %H:%M:%S] ") .. "Payload: " .. vim.inspect(payload) .. "\n\n")
+			f:close()
+		end
+	end
+
 	local res = curl.post(url, {
 		headers = { ["Content-Type"] = "application/json" },
 		body = json.encode(payload),

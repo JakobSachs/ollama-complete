@@ -5,6 +5,7 @@ M.defaults = {
 	base_url = vim.env.OLLAMA_API_BASE or "http://localhost:11434",
 	num_predict = 25,
 	temp = 0.2,
+	debug = false, -- Add debug flag
 }
 
 M.options = {}
