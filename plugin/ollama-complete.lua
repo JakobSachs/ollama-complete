@@ -4,3 +4,5 @@ local ok, _ = pcall(require, "plenary")
 if not ok then
 	vim.notify("ollama-complete.nvim needs plenary.nvim", vim.log.levels.ERROR)
 end
+
+require("ollama-complete.commands")

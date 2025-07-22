@@ -54,4 +54,23 @@ function M.complete_async(prefix, suffix, on_done, model)
 	end)
 end
 
+function M.show_suggestion()
+	local api = vim.api
+
+	local bnr = vim.fn.bufnr("%")
+	local ns_id = api.nvim_create_namespace("ollama-complete")
+
+	local cursor_pos = api.nvim_win_get_cursor(0)
+	local line_num = cursor_pos[1] - 1
+	local col_num = cursor_pos[2]
+
+	local opts = {
+		id = 1,
+		virt_text = { { " -- Hello from Ollama!", "Comment" } },
+		virt_text_pos = "inline",
+	}
+
+	api.nvim_buf_set_extmark(bnr, ns_id, line_num, col_num, opts)
+end
+
 return M
