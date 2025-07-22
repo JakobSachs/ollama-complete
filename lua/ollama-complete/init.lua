@@ -71,7 +71,10 @@ local function debounce(fn, delay)
   end
 end
 
--- refactored to accept suggestion
+-- Store the latest suggestion
+M.latest_suggestion = nil
+
+-- refactored to accept suggestion and store it
 function M.show_suggestion(suggestion)
   local api = vim.api
   local bnr = vim.fn.bufnr("%")
@@ -81,12 +84,36 @@ function M.show_suggestion(suggestion)
   local col_num = cursor_pos[2]
   -- clear previous extmarks
   api.nvim_buf_clear_namespace(bnr, ns_id, 0, -1)
-  local opts = {
-    id = 1,
-    virt_text = { { " " .. (suggestion or ""), "Comment" } },
-    virt_text_pos = "inline",
-  }
-  api.nvim_buf_set_extmark(bnr, ns_id, line_num, col_num, opts)
+  M.latest_suggestion = suggestion or nil
+  if suggestion and suggestion ~= "" then
+    local opts = {
+      id = 1,
+      virt_text = { { " " .. suggestion, "Comment" } },
+      virt_text_pos = "inline",
+    }
+    api.nvim_buf_set_extmark(bnr, ns_id, line_num, col_num, opts)
+  end
+end
+
+-- Accept/apply the suggestion at the cursor
+function M.accept_suggestion()
+  local suggestion = M.latest_suggestion
+  if not suggestion or suggestion == "" then return end
+  local api = vim.api
+  local bnr = vim.fn.bufnr("%")
+  local ns_id = api.nvim_create_namespace("ollama-complete")
+  local cursor_pos = api.nvim_win_get_cursor(0)
+  local line_num = cursor_pos[1] - 1
+  local col_num = cursor_pos[2]
+  local line = api.nvim_get_current_line()
+  -- Insert suggestion at cursor
+  local new_line = line:sub(1, col_num) .. suggestion .. line:sub(col_num + 1)
+  api.nvim_set_current_line(new_line)
+  -- Move cursor to end of inserted suggestion
+  api.nvim_win_set_cursor(0, {line_num + 1, col_num + #suggestion})
+  -- Clear extmark and suggestion
+  api.nvim_buf_clear_namespace(bnr, ns_id, 0, -1)
+  M.latest_suggestion = nil
 end
 
 -- triggers async completion and displays suggestion
@@ -116,6 +143,18 @@ function M.setup(opts)
   vim.api.nvim_create_autocmd({"TextChangedI"}, {
     callback = function()
       debounced_trigger()
+    end,
+  })
+  -- Map <Tab> in insert mode to accept suggestion if present
+  vim.api.nvim_create_autocmd("BufEnter", {
+    callback = function()
+      vim.keymap.set("i", "<Tab>", function()
+        if M.latest_suggestion and M.latest_suggestion ~= "" then
+          M.accept_suggestion()
+        else
+          return "\t"
+        end
+      end, { expr = true, buffer = true, desc = "Accept Ollama suggestion" })
     end,
   })
 end
