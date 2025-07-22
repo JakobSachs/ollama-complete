@@ -99,21 +99,23 @@ end
 function M.accept_suggestion()
   local suggestion = M.latest_suggestion
   if not suggestion or suggestion == "" then return end
-  local api = vim.api
-  local bnr = vim.fn.bufnr("%")
-  local ns_id = api.nvim_create_namespace("ollama-complete")
-  local cursor_pos = api.nvim_win_get_cursor(0)
-  local line_num = cursor_pos[1] - 1
-  local col_num = cursor_pos[2]
-  local line = api.nvim_get_current_line()
-  -- Insert suggestion at cursor
-  local new_line = line:sub(1, col_num) .. suggestion .. line:sub(col_num + 1)
-  api.nvim_set_current_line(new_line)
-  -- Move cursor to end of inserted suggestion
-  api.nvim_win_set_cursor(0, {line_num + 1, col_num + #suggestion})
-  -- Clear extmark and suggestion
-  api.nvim_buf_clear_namespace(bnr, ns_id, 0, -1)
-  M.latest_suggestion = nil
+  vim.schedule(function()
+    local api = vim.api
+    local bnr = vim.fn.bufnr("%")
+    local ns_id = api.nvim_create_namespace("ollama-complete")
+    local cursor_pos = api.nvim_win_get_cursor(0)
+    local line_num = cursor_pos[1] - 1
+    local col_num = cursor_pos[2]
+    local line = api.nvim_get_current_line()
+    -- Insert suggestion at cursor
+    local new_line = line:sub(1, col_num) .. suggestion .. line:sub(col_num + 1)
+    api.nvim_set_current_line(new_line)
+    -- Move cursor to end of inserted suggestion
+    api.nvim_win_set_cursor(0, {line_num + 1, col_num + #suggestion})
+    -- Clear extmark and suggestion
+    api.nvim_buf_clear_namespace(bnr, ns_id, 0, -1)
+    M.latest_suggestion = nil
+  end)
 end
 
 -- triggers async completion and displays suggestion
