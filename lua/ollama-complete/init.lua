@@ -166,14 +166,46 @@ end
 function M.trigger_suggestion()
 	local api = vim.api
 	local cursor_pos = api.nvim_win_get_cursor(0)
-	local line = api.nvim_get_current_line()
+	local line_num = cursor_pos[1] - 1 -- 0-based
 	local col_num = cursor_pos[2]
 	local prefix_window = config.options.prefix_window or 40
 	local suffix_window = config.options.suffix_window or 40
-	local prefix_start = math.max(1, col_num - prefix_window + 1)
-	local prefix = line:sub(prefix_start, col_num)
-	local suffix_end = math.min(#line, col_num + suffix_window)
-	local suffix = line:sub(col_num + 1, suffix_end)
+	local lines = api.nvim_buf_get_lines(0, 0, -1, false)
+
+	-- Collect prefix
+	local prefix = ""
+	local chars_needed = prefix_window
+	local lnum = line_num
+	local cnum = col_num
+	while chars_needed > 0 and lnum >= 0 do
+		local line = lines[lnum + 1] or ""
+		local end_col = (lnum == line_num) and cnum or #line
+		local start_col = math.max(1, end_col - chars_needed + 1)
+		local chunk = line:sub(start_col, end_col)
+		prefix = chunk .. prefix
+		chars_needed = chars_needed - #chunk
+		lnum = lnum - 1
+		cnum = #line
+	end
+
+	-- Collect suffix
+	local suffix = ""
+	chars_needed = suffix_window
+	lnum = line_num
+	cnum = col_num + 1
+	while chars_needed > 0 and lnum < #lines do
+		local line = lines[lnum + 1] or ""
+		local start_col = (lnum == line_num) and cnum + 1 or 1
+		local chunk = line:sub(start_col)
+		if #chunk > chars_needed then
+			chunk = chunk:sub(1, chars_needed)
+		end
+		suffix = suffix .. chunk
+		chars_needed = chars_needed - #chunk
+		lnum = lnum + 1
+		cnum = 0
+	end
+
 	M.complete_async(prefix, suffix, function(suggestion)
 		M.show_suggestion(suggestion)
 	end)
