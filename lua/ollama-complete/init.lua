@@ -105,7 +105,8 @@ end
 -- debounced version
 local debounced_trigger = debounce(M.trigger_suggestion, 200)
 
-function M.setup()
+function M.setup(opts)
+  config.setup(opts or {})
   vim.api.nvim_create_user_command("OllamaShowSuggestion", function()
     M.trigger_suggestion()
   end, {
