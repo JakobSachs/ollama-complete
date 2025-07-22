@@ -35,6 +35,8 @@ The `setup` function can be called to configure the plugin. The following option
 
 -   `model`: The Ollama model to use for completion (default: `"JetBrains/Mellum-4b-sft-python"`)
 -   `base_url`: The base URL for the Ollama API (default: `vim.env.OLLAMA_API_BASE` or `"http://localhost:11434"`)
+-   `num_predict`: Number of tokens to predict for each completion (default: `25`)
+-   `temp`: Sampling temperature for completions (default: `0.2`)
 
 Example configuration:
 
@@ -42,6 +44,8 @@ Example configuration:
 require("ollama-complete.config").setup({
     model = "codegemma",
     base_url = "http://127.0.0.1:11434",
+    num_predict = 50, -- override default if desired
+    temp = 0.5,       -- override default if desired
 })
 ```
 

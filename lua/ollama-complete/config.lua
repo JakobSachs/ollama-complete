@@ -3,6 +3,8 @@ local M = {}
 M.defaults = {
 	model = "JetBrains/Mellum-4b-sft-python",
 	base_url = vim.env.OLLAMA_API_BASE or "http://localhost:11434",
+	num_predict = 25,
+	temp = 0.2,
 }
 
 M.options = {}
