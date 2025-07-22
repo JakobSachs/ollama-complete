@@ -76,6 +76,7 @@ M.latest_suggestion = nil
 
 -- refactored to accept suggestion and store it
 function M.show_suggestion(suggestion)
+  suggestion = suggestion and suggestion:gsub("%z", "") or nil
   local api = vim.api
   local bnr = vim.fn.bufnr("%")
   local ns_id = api.nvim_create_namespace("ollama-complete")
