@@ -73,4 +73,12 @@ function M.show_suggestion()
 	api.nvim_buf_set_extmark(bnr, ns_id, line_num, col_num, opts)
 end
 
+function M.setup()
+	vim.api.nvim_create_user_command("OllamaShowSuggestion", function()
+		M.show_suggestion()
+	end, {
+		desc = "Show a static virtual text suggestion for testing.",
+	})
+end
+
 return M
