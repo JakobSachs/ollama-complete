@@ -168,8 +168,12 @@ function M.trigger_suggestion()
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local line = api.nvim_get_current_line()
 	local col_num = cursor_pos[2]
-	local prefix = line:sub(1, col_num)
-	local suffix = line:sub(col_num + 1)
+	local prefix_window = config.options.prefix_window or 40
+	local suffix_window = config.options.suffix_window or 40
+	local prefix_start = math.max(1, col_num - prefix_window + 1)
+	local prefix = line:sub(prefix_start, col_num)
+	local suffix_end = math.min(#line, col_num + suffix_window)
+	local suffix = line:sub(col_num + 1, suffix_end)
 	M.complete_async(prefix, suffix, function(suggestion)
 		M.show_suggestion(suggestion)
 	end)

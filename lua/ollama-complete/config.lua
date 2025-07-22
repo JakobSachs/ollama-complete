@@ -6,6 +6,8 @@ M.defaults = {
 	num_predict = 25,
 	temp = 0.2,
 	debug = false, -- Add debug flag
+	prefix_window = 40, -- Number of characters before cursor
+	suffix_window = 40, -- Number of characters after cursor
 }
 
 M.options = {}
