@@ -107,12 +107,33 @@ function M.accept_suggestion()
     local line_num = cursor_pos[1] - 1
     local col_num = cursor_pos[2]
     local line = api.nvim_get_current_line()
-    -- Insert suggestion at cursor
-    local new_line = line:sub(1, col_num) .. suggestion .. line:sub(col_num + 1)
-    api.nvim_set_current_line(new_line)
-    -- Move cursor to end of inserted suggestion
-    api.nvim_win_set_cursor(0, {line_num + 1, col_num + #suggestion})
-    -- Clear extmark and suggestion
+
+    -- Split suggestion into lines
+    local suggestion_lines = {}
+    for s in (suggestion .. "\n"):gmatch("(.-)\n") do
+      table.insert(suggestion_lines, s)
+    end
+
+    if #suggestion_lines == 1 then
+      -- Single line: simple replacement
+      local new_line = line:sub(1, col_num) .. suggestion .. line:sub(col_num + 1)
+      api.nvim_set_current_line(new_line)
+      api.nvim_win_set_cursor(0, {line_num + 1, col_num + #suggestion})
+    else
+      -- Multi-line: replace current line and insert new lines
+      local first = line:sub(1, col_num) .. suggestion_lines[1]
+      local last = suggestion_lines[#suggestion_lines] .. line:sub(col_num + 1)
+      local middle = {}
+      for i = 2, #suggestion_lines - 1 do
+        table.insert(middle, suggestion_lines[i])
+      end
+      local new_lines = {first}
+      vim.list_extend(new_lines, middle)
+      table.insert(new_lines, last)
+      api.nvim_buf_set_lines(bnr, line_num, line_num + 1, false, new_lines)
+      api.nvim_win_set_cursor(0, {line_num + #new_lines, #suggestion_lines[#suggestion_lines]})
+    end
+
     api.nvim_buf_clear_namespace(bnr, ns_id, 0, -1)
     M.latest_suggestion = nil
   end)
