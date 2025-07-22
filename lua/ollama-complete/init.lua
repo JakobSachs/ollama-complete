@@ -92,7 +92,7 @@ function M.show_suggestion(suggestion)
   if suggestion and suggestion ~= "" then
     local opts = {
       id = 1,
-      virt_text = { { " " .. suggestion, "Comment" } },
+      virt_text = { { suggestion, "Comment" } },
       virt_text_pos = "inline",
     }
     api.nvim_buf_set_extmark(bnr, ns_id, line_num, col_num, opts)
