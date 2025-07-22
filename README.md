@@ -37,6 +37,9 @@ The `setup` function can be called to configure the plugin. The following option
 -   `base_url`: The base URL for the Ollama API (default: `vim.env.OLLAMA_API_BASE` or `"http://localhost:11434"`)
 -   `num_predict`: Number of tokens to predict for each completion (default: `25`)
 -   `temp`: Sampling temperature for completions (default: `0.2`)
+-   `debug`: Enable debug logging of requests (default: `false`). If true, logs requests to `/tmp/ollama-complete-debug.log` and shows them in `vim.notify`.
+-   `prefix_window`: Number of characters of context to include before the cursor (default: `40`).
+-   `suffix_window`: Number of characters of context to include after the cursor (default: `40`).
 
 Example configuration:
 
@@ -46,6 +49,9 @@ require("ollama-complete.config").setup({
     base_url = "http://127.0.0.1:11434",
     num_predict = 50, -- override default if desired
     temp = 0.5,       -- override default if desired
+    debug = true,     -- enable debug logging
+    prefix_window = 80, -- more context before cursor
+    suffix_window = 80, -- more context after cursor
 })
 ```
 
